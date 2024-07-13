@@ -31,6 +31,10 @@ contract Destination is AccessControl {
         address wrappedTokenAddress = underlying_tokens[_underlying_token];
         BridgeToken wrappedToken = BridgeToken(wrappedTokenAddress);
 
+        // Transfer the underlying tokens from the sender to this contract
+            ERC20 underlyingToken = ERC20(_underlying_token);
+            require(underlyingToken.transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
+
         // Mint the correct amount of BridgeTokens to the recipient
         wrappedToken.mint(_recipient, _amount);
 
@@ -43,9 +47,15 @@ contract Destination is AccessControl {
 // Check that the wrapped token is registered
         require(wrapped_tokens[_wrapped_token] != address(0), "Wrapped token not registered");
 
+      
+
         // Lookup the underlying token corresponding to the wrapped token
         address underlyingTokenAddress = wrapped_tokens[_wrapped_token];
         BridgeToken wrappedToken = BridgeToken(_wrapped_token);
+
+        // Transfer the underlying tokens to the recipient
+        ERC20 underlyingToken = ERC20(underlyingTokenAddress);
+        require(underlyingToken.transfer(_recipient, _amount), "Token transfer failed");
 
         // Burn the specified amount of BridgeTokens from the sender's balance
         wrappedToken.burnFrom(msg.sender, _amount);
@@ -59,7 +69,8 @@ contract Destination is AccessControl {
 // Deploy the new BridgeToken contract
         require(underlying_tokens[_underlying_token] == address(0), "Token already registered");
 
-        
+        //do we need to verify owner of token as sender?
+
         BridgeToken newToken = new BridgeToken(_underlying_token, name, symbol, msg.sender);
         
         // Store the mapping between the underlying token and the wrapped token
