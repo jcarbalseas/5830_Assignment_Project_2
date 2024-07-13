@@ -47,8 +47,6 @@ contract Destination is AccessControl {
 // Check that the wrapped token is registered
         require(wrapped_tokens[_wrapped_token] != address(0), "Wrapped token not registered");
 
-      
-
         // Lookup the underlying token corresponding to the wrapped token
         address underlyingTokenAddress = wrapped_tokens[_wrapped_token];
         BridgeToken wrappedToken = BridgeToken(_wrapped_token);
@@ -67,7 +65,10 @@ contract Destination is AccessControl {
 	function createToken(address _underlying_token, string memory name, string memory symbol ) public onlyRole(CREATOR_ROLE) returns(address) {
 		//YOUR CODE HERE
 // Deploy the new BridgeToken contract
-        require(underlying_tokens[_underlying_token] == address(0), "Token already registered");
+        if (underlying_tokens[_underlying_token] == address(0)){
+          return address(underlying_tokens[_underlying_token]);
+        }
+
 
         //do we need to verify owner of token as sender?
 
