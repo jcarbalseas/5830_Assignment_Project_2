@@ -24,6 +24,7 @@ contract Destination is AccessControl {
 
 	function wrap(address _underlying_token, address _recipient, uint256 _amount ) public onlyRole(WARDEN_ROLE) {
 		//YOUR CODE HERE
+	require(_amount > 0, "Amount must be greater than zero");
         require(underlying_tokens[_underlying_token] != address(0), "Underlying asset not registered");
 
         address wrappedTokenAddress = underlying_tokens[_underlying_token];
@@ -39,6 +40,7 @@ contract Destination is AccessControl {
 
 	function unwrap(address _wrapped_token, address _recipient, uint256 _amount ) public {
 		//YOUR CODE HERE
+	require(_amount > 0, "Amount must be greater than zero");
         require(wrapped_tokens[_wrapped_token] != address(0), "Wrapped token not registered");
 
         address underlyingTokenAddress = wrapped_tokens[_wrapped_token];
