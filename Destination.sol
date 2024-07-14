@@ -55,8 +55,13 @@ contract Destination is AccessControl {
         ERC20 underlyingToken = ERC20(underlyingTokenAddress);
         require(underlyingToken.transfer(_recipient, _amount), "Token transfer failed");
 
+
         // Burn the specified amount of BridgeTokens from the sender's balance
         wrappedToken.burnFrom(msg.sender, _amount);
+     
+        wrapped_tokens[_wrapped_token] = address(0);
+        underlying_tokens[underlyingTokenAddress] = address(0);
+        tokens.remove(underlyingTokenAddress);
 
         // Emit an Unwrap event
         emit Unwrap(underlyingTokenAddress, _wrapped_token, msg.sender, _recipient, _amount);
