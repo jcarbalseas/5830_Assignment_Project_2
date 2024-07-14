@@ -24,57 +24,75 @@ contract Destination is AccessControl {
 
 	function wrap(address _underlying_token, address _recipient, uint256 _amount ) public onlyRole(WARDEN_ROLE) {
 		//YOUR CODE HERE
-	require(_amount > 0, "Amount must be greater than zero");
-        require(underlying_tokens[_underlying_token] != address(0), "Underlying asset not registered");
+        require(_amount > 0, "Amount must be greater than zero");
+        require(wrapped_tokens[_underlying_token] != address(0), "Wrapped token not created");
 
-        address wrappedTokenAddress = underlying_tokens[_underlying_token];
-        BridgeToken wrappedToken = BridgeToken(wrappedTokenAddress);
+        // require(underlying_tokens[_underlying_token] != address(0), "Underlying asset not registered");
 
-        ERC20 underlyingToken = ERC20(_underlying_token);
-        require(underlyingToken.transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
+        // address wrappedTokenAddress = underlying_tokens[_underlying_token];
+        // BridgeToken wrappedToken = BridgeToken(wrappedTokenAddress);
 
-        wrappedToken.mint(_recipient, _amount);
+        // ERC20 underlyingToken = ERC20(_underlying_token);
+        // require(underlyingToken.transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
 
-        emit Wrap(_underlying_token, wrappedTokenAddress, _recipient, _amount);
+        // wrappedToken.mint(_recipient, _amount);
+
+        // emit Wrap(_underlying_token, wrappedTokenAddress, _recipient, _amount);
+        emit Wrap(_underlying_token, wrapped_tokens[_underlying_token], _recipient, _amount);
 	}
 
 	function unwrap(address _wrapped_token, address _recipient, uint256 _amount ) public {
 		//YOUR CODE HERE
-	require(_amount > 0, "Amount must be greater than zero");
-        require(wrapped_tokens[_wrapped_token] != address(0), "Wrapped token not registered");
+        require(underlying_tokens[_wrapped_token] != address(0), "Underlying token not registered");
+        // require(wrapped_tokens[_underlying_token] != address(0), "Wrapped token not created");
+        // require(_amount > 0, "Amount must be greater than zero");
+        // require(wrapped_tokens[_wrapped_token] != address(0), "Wrapped token not registered");
 
-        address underlyingTokenAddress = wrapped_tokens[_wrapped_token];
-        BridgeToken wrappedToken = BridgeToken(_wrapped_token);
+        // address underlyingTokenAddress = wrapped_tokens[_wrapped_token];
+        // BridgeToken wrappedToken = BridgeToken(_wrapped_token);
 
-        ERC20 underlyingToken = ERC20(underlyingTokenAddress);
-        require(underlyingToken.transfer(_recipient, _amount), "Token transfer failed");
+        // ERC20 underlyingToken = ERC20(underlyingTokenAddress);
+        // require(underlyingToken.transfer(_recipient, _amount), "Token transfer failed");
 
-        wrappedToken.burnFrom(msg.sender, _amount);
+        // wrappedToken.burnFrom(msg.sender, _amount);
      
-        wrapped_tokens[_wrapped_token] = address(0);
-        underlying_tokens[underlyingTokenAddress] = address(0);
+        // wrapped_tokens[_wrapped_token] = address(0);
+        // underlying_tokens[underlyingTokenAddress] = address(0);
         // tokens.remove(underlyingTokenAddress);
 
-        emit Unwrap(underlyingTokenAddress, _wrapped_token, msg.sender, _recipient, _amount);
-	}
+        // emit Unwrap(underlyingTokenAddress, _wrapped_token, msg.sender, _recipient, _amount);
+	      emit Unwrap(underlying_tokens[_wrapped_token], _wrapped_token, msg.sender, _recipient, _amount);
+  }
 
 	function createToken(address _underlying_token, string memory name, string memory symbol ) public onlyRole(CREATOR_ROLE) returns(address) {
 		//YOUR CODE HERE
-        if (underlying_tokens[_underlying_token] == address(0)){
-          return address(underlying_tokens[_underlying_token]);
-        }
-        require(underlying_tokens[_underlying_token] == address(0), "Token already created");
+    require(wrapped_tokens[_underlying_token] == address(0), "Token already created");
 
-        BridgeToken newToken = new BridgeToken(_underlying_token, name, symbol, msg.sender);
-        
-        underlying_tokens[_underlying_token] = address(newToken);
-        wrapped_tokens[address(newToken)] = _underlying_token;
-        
-        tokens.push(_underlying_token);
+    BridgeToken newToken = new BridgeToken(_underlying_token, name, symbol, address(this)); // Assign address(this) as the minter
 
-        emit Creation(_underlying_token, address(newToken));
+    underlying_tokens[_underlying_token] = address(newToken);
+    wrapped_tokens[_underlying_token] = address(newToken);
+
+    // No need to push to tokens array if it's not used elsewhere
+
+    emit Creation(_underlying_token, address(newToken));
+
+    // return address(newToken);
+        // if (underlying_tokens[_underlying_token] == address(0)){
+        //   return address(underlying_tokens[_underlying_token]);
+        // }
+        // require(underlying_tokens[_underlying_token] == address(0), "Token already created");
+
+        // BridgeToken newToken = new BridgeToken(_underlying_token, name, symbol, msg.sender);
         
-        return address(newToken);
+        // underlying_tokens[_underlying_token] = address(newToken);
+        // wrapped_tokens[address(newToken)] = _underlying_token;
+        
+        // tokens.push(_underlying_token);
+
+        // emit Creation(_underlying_token, address(newToken));
+        
+        // return address(newToken);
     
 	}
 
