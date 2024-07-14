@@ -71,7 +71,7 @@ contract Destination is AccessControl {
     BridgeToken newToken = new BridgeToken(_underlying_token, name, symbol, address(this)); // Assign address(this) as the minter
 
     underlying_tokens[_underlying_token] = address(newToken);
-    wrapped_tokens[_underlying_token] = address(newToken);
+    wrapped_tokens[address(newToken)] = _underlying_token;
 
     // No need to push to tokens array if it's not used elsewhere
 
