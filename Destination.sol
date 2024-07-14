@@ -23,40 +23,53 @@ contract Destination is AccessControl {
     }
 
     function wrap(address _underlying_token, address _recipient, uint256 _amount) public onlyRole(WARDEN_ROLE) {
-        //YOUR CODE HERE
+        // Ensure the amount is greater than zero
         require(_amount > 0, "Amount must be greater than zero");
+        
+        // Check if the wrapped token for the underlying token exists
         require(wrapped_tokens[_underlying_token] != address(0), "Wrapped token not created");
 
+        // Mint the wrapped token to the recipient
         BridgeToken wrappedToken = BridgeToken(wrapped_tokens[_underlying_token]);
         wrappedToken.mint(_recipient, _amount);
 
+        // Emit the wrap event
         emit Wrap(_underlying_token, wrapped_tokens[_underlying_token], _recipient, _amount);
     }
 
     function unwrap(address _wrapped_token, address _recipient, uint256 _amount) public {
-        //YOUR CODE HERE
+        // Ensure the amount is greater than zero
         require(_amount > 0, "Amount must be greater than zero");
+
+        // Check if the underlying token for the wrapped token exists
         require(underlying_tokens[_wrapped_token] != address(0), "Underlying token not registered");
 
+        // Burn the wrapped token from the sender
         BridgeToken wrappedToken = BridgeToken(_wrapped_token);
         wrappedToken.burnFrom(msg.sender, _amount);
 
+        // Emit the unwrap event
         emit Unwrap(underlying_tokens[_wrapped_token], _wrapped_token, msg.sender, _recipient, _amount);
     }
 
     function createToken(address _underlying_token, string memory name, string memory symbol) public onlyRole(CREATOR_ROLE) returns (address) {
-        //YOUR CODE HERE
+        // Check if the wrapped token for the underlying token already exists
         require(wrapped_tokens[_underlying_token] == address(0), "Token already created");
 
+        // Create a new BridgeToken with the contract itself as the minter
         BridgeToken newToken = new BridgeToken(_underlying_token, name, symbol, address(this)); // Assign address(this) as the minter
 
+        // Map the underlying token to the new wrapped token and vice versa
         underlying_tokens[_underlying_token] = address(newToken);
         wrapped_tokens[address(newToken)] = _underlying_token;
 
+        // Add the new token to the list of tokens
         tokens.push(_underlying_token);
 
+        // Emit the creation event
         emit Creation(_underlying_token, address(newToken));
 
+        // Return the address of the new wrapped token
         return address(newToken);
     }
 }
