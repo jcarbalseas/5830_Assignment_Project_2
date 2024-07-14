@@ -51,7 +51,7 @@ contract Destination is AccessControl {
      
         wrapped_tokens[_wrapped_token] = address(0);
         underlying_tokens[underlyingTokenAddress] = address(0);
-        tokens.remove(underlyingTokenAddress);
+        // tokens.remove(underlyingTokenAddress);
 
         emit Unwrap(underlyingTokenAddress, _wrapped_token, msg.sender, _recipient, _amount);
 	}
