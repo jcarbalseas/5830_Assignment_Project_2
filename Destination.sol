@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./BridgeToken.sol";
-import "forge-std/console.sol"; // Import console for debugging
 
 contract Destination is AccessControl {
     bytes32 public constant WARDEN_ROLE = keccak256("BRIDGE_WARDEN_ROLE");
@@ -24,7 +23,6 @@ contract Destination is AccessControl {
     }
 
     function wrap(address _underlying_token, address _recipient, uint256 _amount) public onlyRole(WARDEN_ROLE) {
-        console.log("wrap function called with underlying_token:", _underlying_token, "recipient:", _recipient, "amount:", _amount);
         require(underlying_tokens[_underlying_token] != address(0), "Underlying asset not registered");
 
         address wrappedTokenAddress = underlying_tokens[_underlying_token];
@@ -33,11 +31,9 @@ contract Destination is AccessControl {
         wrappedToken.mint(_recipient, _amount);
 
         emit Wrap(_underlying_token, wrappedTokenAddress, _recipient, _amount);
-        console.log("wrap function executed successfully");
     }
 
     function unwrap(address _wrapped_token, address _recipient, uint256 _amount) public {
-        console.log("unwrap function called with wrapped_token:", _wrapped_token, "recipient:", _recipient, "amount:", _amount);
         require(wrapped_tokens[_wrapped_token] != address(0), "Wrapped token not registered");
 
         address underlyingTokenAddress = wrapped_tokens[_wrapped_token];
@@ -46,11 +42,9 @@ contract Destination is AccessControl {
         wrappedToken.burnFrom(msg.sender, _amount);
 
         emit Unwrap(underlyingTokenAddress, _wrapped_token, msg.sender, _recipient, _amount);
-        console.log("unwrap function executed successfully");
     }
 
     function createToken(address _underlying_token, string memory name, string memory symbol) public onlyRole(CREATOR_ROLE) returns (address) {
-        console.log("createToken function called with underlying_token:", _underlying_token, "name:", name, "symbol:", symbol);
         require(underlying_tokens[_underlying_token] == address(0), "Token already created");
 
         BridgeToken newToken = new BridgeToken(_underlying_token, name, symbol, msg.sender);
@@ -61,7 +55,6 @@ contract Destination is AccessControl {
         tokens.push(_underlying_token);
 
         emit Creation(_underlying_token, address(newToken));
-        console.log("createToken function executed successfully, newToken address:", address(newToken));
         return address(newToken);
     }
 }
