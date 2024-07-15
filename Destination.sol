@@ -8,8 +8,8 @@ import "./BridgeToken.sol";
 contract Destination is AccessControl {
     bytes32 public constant WARDEN_ROLE = keccak256("BRIDGE_WARDEN_ROLE");
     bytes32 public constant CREATOR_ROLE = keccak256("CREATOR_ROLE");
-    mapping(address => address) public underlying_tokens;
-    mapping(address => address) public wrapped_tokens;
+    mapping(address => address) public underlying_tokens; // Maps wrapped tokens to underlying tokens
+    mapping(address => address) public wrapped_tokens;    // Maps underlying tokens to wrapped tokens
     address[] public tokens;
 
     event Creation(address indexed underlying_token, address indexed wrapped_token);
@@ -53,15 +53,15 @@ contract Destination is AccessControl {
     }
 
     function createToken(address _underlying_token, string memory name, string memory symbol) public onlyRole(CREATOR_ROLE) returns (address) {
-        // Check if the wrapped token for the underlying token already exists
-        require(wrapped_tokens[_underlying_token] == address(0), "Token already created");
+        // Check if the token has already been created
+        require(underlying_tokens[_underlying_token] == address(0), "Token already created");
 
         // Create a new BridgeToken with the contract itself as the minter
         BridgeToken newToken = new BridgeToken(_underlying_token, name, symbol, address(this)); // Assign address(this) as the minter
 
         // Map the underlying token to the new wrapped token and vice versa
-        underlying_tokens[_underlying_token] = address(newToken);
-        wrapped_tokens[address(newToken)] = _underlying_token;
+        wrapped_tokens[_underlying_token] = address(newToken); // Corrected mapping
+        underlying_tokens[address(newToken)] = _underlying_token; // Corrected mapping
 
         // Add the new token to the list of tokens
         tokens.push(_underlying_token);
